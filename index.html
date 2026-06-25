@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>냥코 캐처 - Nyanco Catcher</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="game-container">
+    <div class="screen start-screen" id="startScreen">
+      <div class="logo">
+        <div class="logo-cat">🐱</div>
+        <h1>냥코 캐처</h1>
+        <p class="subtitle">Nyanco Catcher</p>
+      </div>
+      <div class="instructions">
+        <p>화살표 또는 마우스로 고양이 이동</p>
+        <p>물고기를 받아서 점수를 올리세요!</p>
+        <p>폭탄을 조심하세요!</p>
+        <p>별은 특수 능력을 줍니다!</p>
+      </div>
+      <button class="btn btn-start" id="startBtn">게임 시작</button>
+      <div class="high-score-display">
+        <span>최고 점수: </span>
+        <span id="highScoreStart">0</span>
+      </div>
+    </div>
+
+    <div class="screen game-screen hidden" id="gameScreen">
+      <header class="game-header">
+        <div class="stat">
+          <span class="stat-icon">🐟</span>
+          <span class="stat-value" id="scoreDisplay">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">❤️</span>
+          <span class="stat-value" id="livesDisplay">3</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">🔥</span>
+          <span class="stat-value" id="comboDisplay">x1</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">📊</span>
+          <span class="stat-value" id="levelDisplay">Lv.1</span>
+        </div>
+      </header>
+      <canvas id="gameCanvas"></canvas>
+      <div class="power-up-indicator hidden" id="powerUpIndicator">
+        <span id="powerUpIcon"></span>
+        <span id="powerUpTime"></span>
+      </div>
+    </div>
+
+    <div class="screen gameover-screen hidden" id="gameoverScreen">
+      <div class="gameover-content">
+        <h2 id="gameoverTitle">게임 오버</h2>
+        <div class="final-cat" id="finalCat"></div>
+        <div class="final-stats">
+          <div class="final-stat">
+            <span>최종 점수</span>
+            <b id="finalScore">0</b>
+          </div>
+          <div class="final-stat">
+            <span>최대 콤보</span>
+            <b id="finalCombo">0</b>
+          </div>
+          <div class="final-stat">
+            <span>도달 레벨</span>
+            <b id="finalLevel">1</b>
+          </div>
+        </div>
+        <div class="new-record hidden" id="newRecord">🎉 새로운 기록! 🎉</div>
+        <button class="btn btn-restart" id="restartBtn">다시 도전</button>
+        <button class="btn btn-home" id="homeBtn">홈으로</button>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
