@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>텐텐 런크래프트 - 사이버펑크 러닝 시뮬레이터</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- 커스텀 스타일시트 -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- TMAP JavaScript Web API -->
+  <script src="https://apis.openapi.sktelecom.com/tmap/jsv2?version=1&appKey=YOUR_TMAP_API_KEY"></script>
+</head>
+
+<body class="bg-dark-bg text-white font-body overflow-hidden">
+
+  <!-- ============================================================
+       1) 로비 화면 - 프라이빗 룸 만들기 / 방 입장하기
+       ============================================================ -->
+  <div id="lobby" class="lobby-screen">
+    <div class="lobby-content">
+      <h1 class="lobby-title">RUN<span>CRAFT</span></h1>
+      <p class="lobby-sub">텐텐 스타일 사이버펑크 러닝 시뮬레이터 · 단독 구동형</p>
+
+      <button id="btn-create-room" class="btn-neon btn-neon-pink w-full">
+        <span class="text-xl">⚡</span> 프라이빗 룸 만들기
+      </button>
+
+      <div class="lobby-divider">또는</div>
+
+      <div class="join-row">
+        <input id="input-room-code" type="text" maxlength="6" placeholder="방 코드 (예: #7739)" />
+        <button id="btn-join-room" class="btn-neon btn-neon-cyan">방 입장하기</button>
+      </div>
+
+      <div id="lobby-toast" class="lobby-toast"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       2) 메인 화면 - 방 입장 후 레이아웃
+       ============================================================ -->
+  <div id="main" class="hidden h-screen flex flex-col">
+
+    <!-- 상단 헤더 -->
+    <header class="main-header">
+      <div class="room-badge">룸 <span id="room-code-text">#0000</span></div>
+      <h2 class="main-title">런크래프트 아레나</h2>
+      <button id="btn-leave-room" class="btn-ghost">나가기</button>
+    </header>
+
+    <!-- 3컬럼 그리드: 좌측 코스 / 중앙 티맵 / 우측 리더보드 -->
+    <div class="main-grid">
+
+      <!-- 좌측: 코스 선택 -->
+      <aside class="panel course-panel">
+        <h3 class="panel-title">▸ 코스 선택</h3>
+
+        <button class="course-card" data-course="gwanghwamun">
+          <div class="course-head">
+            <span class="course-name">🐾 광화문 댕댕런</span>
+            <span class="course-emoji">🐶</span>
+          </div>
+          <div class="course-meta">2.5km · 5개 체크포인트</div>
+          <div class="course-bar"><div class="course-bar-fill pink"></div></div>
+        </button>
+
+        <button class="course-card" data-course="yeouido">
+          <div class="course-head">
+            <span class="course-name">🍠 여의도 고구마런</span>
+            <span class="course-emoji">🍂</span>
+          </div>
+          <div class="course-meta">3.2km · 6개 체크포인트</div>
+          <div class="course-bar"><div class="course-bar-fill cyan"></div></div>
+        </button>
+
+        <!-- 상태 박스 -->
+        <div class="status-box">
+          <div class="status-row"><span>선택 코스</span><span id="stat-course">-</span></div>
+          <div class="status-row"><span>내 거리</span><span id="stat-my-dist">0.00 km</span></div>
+          <div class="status-row"><span>진행률</span><span id="stat-progress">0%</span></div>
+          <div class="status-row"><span>시간</span><span id="stat-time">00:00</span></div>
+        </div>
+
+        <button id="btn-start-run" class="btn-neon btn-neon-pink w-full big">
+          <span class="text-xl">🏃</span> 가상 러닝 시작
+        </button>
+        <button id="btn-reset-run" class="btn-ghost w-full mt-2">↻ 초기화</button>
+      </aside>
+
+      <!-- 중앙: 티맵 -->
+      <section class="panel map-panel">
+        <div id="map_div" style="width:100%; height:450px;"></div>
+        <div class="map-hint">Tmap 지도 · 네온 핑크 폴리라인 경로</div>
+      </section>
+
+      <!-- 우측: 텐텐 스타일 가상 친구 실시간 리더보드 -->
+      <aside class="panel leaderboard-panel">
+        <h3 class="panel-title">▸ 실시간 리더보드</h3>
+        <div id="leaderboard" class="leaderboard-list"></div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- 토스트 알림 컨테이너 -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

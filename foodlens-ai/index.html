@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodLens AI — 나만의 AI 식단 비서</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-gray-950 text-white font-['Noto_Sans_KR'] min-h-screen">
+
+  <!-- ========== 온보딩 모달 ========== -->
+  <div id="onboarding-modal" class="modal-overlay">
+    <div class="modal-content onboarding-modal">
+      <div class="onboarding-header">
+        <div class="logo-icon">🔬</div>
+        <h1 class="text-2xl font-black bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">FoodLens AI</h1>
+        <p class="text-gray-400 text-sm mt-1">나만의 AI 식단 비서를 시작해요</p>
+      </div>
+
+      <div class="onboarding-steps">
+        <!-- Step 1 -->
+        <div class="onboarding-step active" data-step="1">
+          <div class="step-indicator">
+            <span class="step-num">1</span>
+            <span class="step-label">나의 목표</span>
+          </div>
+          <p class="step-question">지금 당신의 목표는 무엇인가요?</p>
+          <div class="option-grid">
+            <button class="option-btn" data-group="goal" data-value="loss">
+              <span class="option-icon">🔥</span>
+              <span>체중 감량</span>
+            </button>
+            <button class="option-btn" data-group="goal" data-value="gain">
+              <span class="option-icon">💪</span>
+              <span>근육 증량</span>
+            </button>
+            <button class="option-btn" data-group="goal" data-value="maintain">
+              <span class="option-icon">⚖️</span>
+              <span>체중 유지</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="onboarding-step" data-step="2">
+          <div class="step-indicator">
+            <span class="step-num">2</span>
+            <span class="step-label">활동량</span>
+          </div>
+          <p class="step-question">평소 활동량은 어느 정도인가요?</p>
+          <div class="option-grid">
+            <button class="option-btn" data-group="activity" data-value="low">
+              <span class="option-icon">🛋️</span>
+              <span>거의 안 움직여요</span>
+            </button>
+            <button class="option-btn" data-group="activity" data-value="medium">
+              <span class="option-icon">🚶</span>
+              <span>가벼운 활동</span>
+            </button>
+            <button class="option-btn" data-group="activity" data-value="high">
+              <span class="option-icon">🏃</span>
+              <span>활발한 운동</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="onboarding-step" data-step="3">
+          <div class="step-indicator">
+            <span class="step-num">3</span>
+            <span class="step-label">체중</span>
+          </div>
+          <p class="step-question">현재 체중을 알려주세요 (kg)</p>
+          <div class="weight-input-wrap">
+            <input type="number" id="weight-input" class="weight-input" placeholder="65" min="20" max="300" />
+            <span class="weight-unit">kg</span>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="onboarding-step" data-step="4">
+          <div class="step-indicator">
+            <span class="step-num">4</span>
+            <span class="step-label">최애 음식</span>
+          </div>
+          <p class="step-question">당신의 최애 음식은 무엇인가요? 🍽️</p>
+          <div class="option-grid fav-grid">
+            <button class="option-btn" data-group="favFood" data-value="치킨">
+              <span class="option-icon">🍗</span>
+              <span>치킨</span>
+            </button>
+            <button class="option-btn" data-group="favFood" data-value="마라탕">
+              <span class="option-icon">🍲</span>
+              <span>마라탕</span>
+            </button>
+            <button class="option-btn" data-group="favFood" data-value="떡볶이">
+              <span class="option-icon">🌶️</span>
+              <span>떡볶이</span>
+            </button>
+            <button class="option-btn" data-group="favFood" data-value="샐러드">
+              <span class="option-icon">🥗</span>
+              <span>샐러드</span>
+            </button>
+            <button class="option-btn" data-group="favFood" data-value="피자">
+              <span class="option-icon">🍕</span>
+              <span>피자</span>
+            </button>
+            <button class="option-btn" data-group="favFood" data-value="햄버거">
+              <span class="option-icon">🍔</span>
+              <span>햄버거</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="onboarding-progress">
+        <div class="progress-bar" id="onboarding-progress-bar"></div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="onboarding-nav">
+        <button id="onboarding-prev" class="nav-btn prev-btn" disabled>← 이전</button>
+        <button id="onboarding-next" class="nav-btn next-btn">다음 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 메인 대시보드 ========== -->
+  <div id="app" class="hidden">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🔬</span>
+        <h1 class="text-lg font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">FoodLens AI</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="profile-btn" class="profile-btn" title="프로필">
+          <span>👤</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Daily Summary -->
+    <section class="daily-summary">
+      <div class="summary-card">
+        <p class="summary-label">오늘 섭취 칼로리</p>
+        <div class="calorie-display">
+          <span id="total-calories" class="calorie-number">0</span>
+          <span class="calorie-unit">kcal</span>
+        </div>
+        <div class="calorie-bar-wrap">
+          <div class="calorie-bar" id="calorie-bar"></div>
+        </div>
+        <p class="summary-sub">목표: <span id="goal-calories">2000</span> kcal</p>
+      </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload-section">
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="food-image-input" accept="image/*" capture="environment" class="hidden" />
+        <div class="upload-placeholder" id="upload-placeholder">
+          <div class="upload-icon">📸</div>
+          <p class="upload-text">음식 사진을 찍거나<br/>갤러리에서 선택하세요</p>
+          <p class="upload-hint">AI가 즉시 분석해 드려요</p>
+        </div>
+        <div class="upload-preview hidden" id="upload-preview">
+          <img id="preview-img" src="" alt="음식 미리보기" />
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Analysis Loading -->
+    <section class="analysis-section hidden" id="analysis-section">
+      <div class="analysis-card">
+        <div class="analysis-header">
+          <div class="ai-pulse">
+            <span class="pulse-dot"></span>
+            <span>AI가 픽셀 분석 중...</span>
+          </div>
+        </div>
+        <div class="loading-bar-wrap">
+          <div class="loading-bar" id="loading-bar"></div>
+        </div>
+        <p class="loading-text" id="loading-text">음식 종류를 식별하고 있습니다...</p>
+      </div>
+    </section>
+
+    <!-- Result Section -->
+    <section class="result-section hidden" id="result-section">
+      <!-- Food Name -->
+      <div class="result-header">
+        <h2 id="food-name" class="food-name">—</h2>
+        <span id="food-calorie-badge" class="calorie-badge">— kcal</span>
+      </div>
+
+      <!-- Macro Chart -->
+      <div class="macro-chart-card">
+        <h3 class="chart-title">영양소 분석</h3>
+        <div class="macro-bars">
+          <div class="macro-row">
+            <span class="macro-label">탄수화물</span>
+            <div class="macro-bar-wrap">
+              <div class="macro-bar carb-bar" id="carb-bar"></div>
+            </div>
+            <span class="macro-value" id="carb-value">0g</span>
+          </div>
+          <div class="macro-row">
+            <span class="macro-label">단백질</span>
+            <div class="macro-bar-wrap">
+              <div class="macro-bar protein-bar" id="protein-bar"></div>
+            </div>
+            <span class="macro-value" id="protein-value">0g</span>
+          </div>
+          <div class="macro-row">
+            <span class="macro-label">지방</span>
+            <div class="macro-bar-wrap">
+              <div class="macro-bar fat-bar" id="fat-bar"></div>
+            </div>
+            <span class="macro-value" id="fat-value">0g</span>
+          </div>
+        </div>
+        <!-- Donut Chart -->
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" class="donut-chart" id="donut-chart">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="16" />
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#3b82f6" stroke-width="16"
+              stroke-dasharray="0 314" stroke-dashoffset="0" class="donut-segment carb-segment"
+              transform="rotate(-90 60 60)" />
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="16"
+              stroke-dasharray="0 314" stroke-dashoffset="0" class="donut-segment protein-segment"
+              transform="rotate(-90 60 60)" />
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#f59e0b" stroke-width="16"
+              stroke-dasharray="0 314" stroke-dashoffset="0" class="donut-segment fat-segment"
+              transform="rotate(-90 60 60)" />
+          </svg>
+          <div class="donut-legend">
+            <span class="legend-item"><i class="dot carb-dot"></i>탄수화물</span>
+            <span class="legend-item"><i class="dot protein-dot"></i>단백질</span>
+            <span class="legend-item"><i class="dot fat-dot"></i>지방</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Feedback -->
+      <div class="ai-feedback-card" id="ai-feedback">
+        <div class="feedback-icon">🤖</div>
+        <p class="feedback-text" id="feedback-text">분석 결과가 여기에 표시됩니다.</p>
+      </div>
+
+      <!-- Fav Food Special Feedback -->
+      <div class="fav-food-feedback hidden" id="fav-food-feedback">
+        <span class="fav-emoji">💖</span>
+        <p id="fav-food-msg">최애 음식 감지!</p>
+      </div>
+    </section>
+
+    <!-- Meal History -->
+    <section class="history-section">
+      <h3 class="section-title">오늘의 식단 기록</h3>
+      <div id="meal-history" class="meal-list">
+        <p class="empty-history">아직 기록이 없어요. 첫 식사를 분석해보세요! 📷</p>
+      </div>
+    </section>
+
+    <!-- B2B Banner -->
+    <section class="banner-section">
+      <div class="banner-card" id="local-banner">
+        <div class="banner-badge">📍 지역 제휴</div>
+        <h4 class="banner-title">주변 샐러드 숍 & 헬스장 쿠폰</h4>
+        <p class="banner-desc">AI가 추천하는 근처 건강식당 할인 쿠폰을 받아보세요!</p>
+        <div class="banner-coupons">
+          <div class="coupon-chip">🥗 샐러드맨 30% 할인</div>
+          <div class="coupon-chip">🏋️ 피트니스플러스 1일 무료</div>
+          <div class="coupon-chip">🥤 그린주스 1+1</div>
+        </div>
+        <button class="banner-cta">쿠폰 받기 →</button>
+      </div>
+    </section>
+
+    <!-- AI Fit Pass -->
+    <section class="pass-section">
+      <button class="pass-card" id="open-pass-modal">
+        <div class="pass-glow"></div>
+        <div class="pass-content">
+          <span class="pass-badge">PREMIUM</span>
+          <h4 class="pass-title">AI 핏 패스</h4>
+          <p class="pass-desc">주간 누적 리포트 & AI 맞춤 식단표 해금</p>
+          <div class="pass-price">
+            <span class="price-old">₩14,900</span>
+            <span class="price-new">₩4,900<span class="price-period">/월</span></span>
+          </div>
+          <span class="pass-cta">지금 시작하기 →</span>
+        </div>
+      </button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>© 2026 FoodLens AI — Built with 💚</p>
+    </footer>
+  </div>
+
+  <!-- ========== AI 핏 패스 모달 ========== -->
+  <div id="pass-modal" class="modal-overlay hidden">
+    <div class="modal-content pass-modal">
+      <button class="modal-close" id="close-pass-modal">✕</button>
+      <div class="pass-modal-header">
+        <span class="pass-modal-icon">⚡</span>
+        <h2>AI 핏 패스</h2>
+        <p>AI 기반 프리미엄 식단 관리</p>
+      </div>
+      <ul class="pass-features">
+        <li>✅ 주간·월간 누적 영양 리포트</li>
+        <li>✅ AI 맞춤 식단표 자동 생성</li>
+        <li>✅ 만보계 연동 칼로리 실시간 추적</li>
+        <li>✅ 전문 영양사 Q&A 무제한</li>
+        <li>✅ 광고 완전 제거</li>
+      </ul>
+      <div class="pass-modal-price">
+        <span class="pm-old">₩14,900/월</span>
+        <span class="pm-new">₩4,900<span>/월</span></span>
+      </div>
+      <button class="pass-subscribe-btn">구독 시작하기</button>
+      <p class="pass-note">7일 무료 체험 · 언제든 해지 가능</p>
+    </div>
+  </div>
+
+  <!-- ========== 프로필 모달 ========== -->
+  <div id="profile-modal" class="modal-overlay hidden">
+    <div class="modal-content profile-modal">
+      <button class="modal-close" id="close-profile-modal">✕</button>
+      <h2>👤 내 프로필</h2>
+      <div class="profile-info">
+        <div class="profile-row"><span>목표</span><span id="p-goal">—</span></div>
+        <div class="profile-row"><span>활동량</span><span id="p-activity">—</span></div>
+        <div class="profile-row"><span>체중</span><span id="p-weight">—</span></div>
+        <div class="profile-row"><span>최애 음식</span><span id="p-fav">—</span></div>
+        <div class="profile-row"><span>목표 칼로리</span><span id="p-target-cal">—</span></div>
+      </div>
+      <button class="edit-profile-btn" id="edit-profile-btn">프로필 수정</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

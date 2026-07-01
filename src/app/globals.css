@@ -1,0 +1,33 @@
+/* Pretendard(국문) + Inter(라틴/숫자) — 토스·NRC 톤의 모던 산세리프 스택 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --font-sans: 'Pretendard Variable', Pretendard, 'Inter', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  /* 매트하고 깊이감 있는 딥 슬레이트 블랙 */
+  background: #0b0f19;
+  color: #f1f5f9;
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+}

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카카오맵 API 연동 예제</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 { text-align: center; margin-bottom: 20px; color: #333; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .map-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
+    .map-container { flex: 1; min-width: 300px; height: 500px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    #map { width: 100%; height: 100%; }
+    .controls { flex: 0 0 300px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .controls h2 { font-size: 18px; margin-bottom: 15px; color: #333; border-bottom: 2px solid #ffd600; padding-bottom: 10px; }
+    .control-group { margin-bottom: 15px; }
+    .control-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
+    .control-group input, .control-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+    .btn { width: 100%; padding: 12px; background-color: #ffd600; color: #333; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+    .btn:hover { background-color: #ffcc00; }
+    .btn + .btn { margin-top: 10px; }
+    .info-box { margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 8px; font-size: 14px; line-height: 1.6; }
+    .info-box strong { color: #333; }
+    #clickInfo { margin-top: 15px; padding: 15px; background-color: #e3f2fd; border-radius: 8px; font-size: 14px; display: none; }
+    .setup-guide { margin-top: 30px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .setup-guide h2 { font-size: 20px; margin-bottom: 15px; color: #333; }
+    .setup-guide ol { padding-left: 20px; line-height: 1.8; }
+    .setup-guide li { margin-bottom: 10px; }
+    .setup-guide code { background-color: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-family: Consolas, Monaco, monospace; color: #e91e63; }
+    .setup-guide .warning { margin-top: 15px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗺️ 카카오맵 API 연동 예제</h1>
+    <div class="map-wrapper">
+      <div class="map-container">
+        <div id="map"></div>
+      </div>
+      <div class="controls">
+        <h2>지도 제어</h2>
+        <div class="control-group">
+          <label>주소 검색</label>
+          <input type="text" id="addressInput" placeholder="주소를 입력하세요 (예: 서울특별시청)">
+        </div>
+        <button class="btn" onclick="searchAddress()">🔍 주소 검색</button>
+        <div class="control-group" style="margin-top: 20px;">
+          <label>내 위치로 이동</label>
+          <button class="btn" onclick="moveToCurrentLocation()">📍 내 위치 찾기</button>
+        </div>
+        <div class="control-group" style="margin-top: 20px;">
+          <label>마커 추가</label>
+          <button class="btn" onclick="addMarker()">📌 마커 추가 (지도 클릭)</button>
+        </div>
+        <div class="control-group" style="margin-top: 20px;">
+          <label>지도 레벨</label>
+          <select id="zoomLevel" onchange="changeZoomLevel()">
+            <option value="1">레벨 1 (가장 확대)</option>
+            <option value="3">레벨 3</option>
+            <option value="5">레벨 5</option>
+            <option value="7" selected>레벨 7</option>
+            <option value="9">레벨 9</option>
+            <option value="11">레벨 11</option>
+            <option value="14">레벨 14 (가장 축소)</option>
+          </select>
+        </div>
+        <div id="clickInfo">
+          <strong>클릭한 위치:</strong><br>
+          <span id="clickLat">위도: -</span><br>
+          <span id="clickLng">경도: -</span>
+        </div>
+        <div class="info-box">
+          <strong>💡 팁:</strong><br>
+          • 지도를 클릭하면 좌표를 확인할 수 있습니다<br>
+          • 마커를 드래그하여 이동할 수 있습니다<br>
+          • 마우스 휠로 확대/축소 가능합니다
+        </div>
+      </div>
+    </div>
+    <div class="setup-guide">
+      <h2> 카카오맵 API 설정 가이드</h2>
+      <ol>
+        <li><strong>카카오디벨로퍼스에서 앱 생성</strong><br><a href="https://developers.kakao.com" target="_blank">developers.kakao.com</a>에서 앱 생성 완료 ✓</li>
+        <li><strong>JavaScript 키 발급</strong><br>앱 설정 > 플랫폼 > Web 플랫폼 등록 > JavaScript 키 확인<br><code>사이트 도메인</code>에 <code>http://localhost</code> 또는 실제 도메인 등록</li>
+        <li><strong>카카오맵 사용 설정</strong><br>앱 관리 페이지 > 카카오맵 > 사용 설정 > 상태: <strong>ON</strong></li>
+        <li><strong>아래 코드의 YOUR_JAVASCRIPT_KEY를 실제 키로 변경</strong></li>
+      </ol>
+      <div class="warning">
+        <strong>⚠️ 주의:</strong><br>
+        • 반드시 <strong>JavaScript 키</strong>를 사용하세요 (REST API 키 아님)<br>
+        • 프로덕션 환경에서는 API 키를 노출하지 않도록 주의하세요<br>
+        • 2024년 12월 1일부터 신규 앱은 카카오맵 사용 설정이 필수입니다
+      </div>
+    </div>
+  </div>
+
+  <!-- 카카오맵 SDK 로드 (autoload=true, services 라이브러리 포함) -->
+  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ae2b037435fa58b038b42a0ee17ea11f&libraries=services"></script>
+  
+  <script>
+    let map;
+    let markers = [];
+    let geocoder;
+    let addMarkerMode = false;
+
+    // DOM이 로드된 후 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+      // 카카오맵 SDK가 로드될 때까지 대기
+      function waitForKakao() {
+        if (typeof kakao !== 'undefined' && kakao.maps) {
+          initMap();
+        } else {
+          setTimeout(waitForKakao, 100);
+        }
+      }
+      waitForKakao();
+    });
+
+    function initMap() {
+      console.log('카카오맵 SDK 버전:', kakao.maps.VERSION);
+      
+      const container = document.getElementById('map');
+      const options = {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: 7
+      };
+
+      map = new kakao.maps.Map(container, options);
+
+      // Geocoder 초기화
+      geocoder = new kakao.maps.services.Geocoder();
+      console.log('Geocoder 초기화 완료:', geocoder);
+
+      // 지도 클릭 이벤트
+      kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+        const latlng = mouseEvent.latLng;
+        showClickInfo(latlng.getLat(), latlng.getLng());
+
+        // 마커 추가 모드일 때
+        if (addMarkerMode) {
+          const marker = new kakao.maps.Marker({
+            map: map,
+            position: latlng,
+            draggable: true
+          });
+          markers.push(marker);
+          addMarkerMode = false;
+          map.setCursor('');
+        }
+      });
+
+      console.log('지도 초기화 완료!');
+    }
+
+    function searchAddress() {
+      const address = document.getElementById('addressInput').value.trim();
+      
+      if (!address) {
+        alert('주소를 입력해주세요!');
+        return;
+      }
+
+      if (!geocoder) {
+        alert('지도가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
+        return;
+      }
+
+      console.log('주소 검색 시작:', address);
+
+      geocoder.addressSearch(address, function(result, status) {
+        console.log('검색 결과 status:', status);
+        console.log('검색 결과 result:', result);
+
+        if (status === kakao.maps.services.Status.OK) {
+          const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+          
+          map.setCenter(coords);
+          removeMarkers();
+          
+          const marker = new kakao.maps.Marker({
+            map: map,
+            position: coords,
+            draggable: true
+          });
+          markers.push(marker);
+
+          const infowindow = new kakao.maps.InfoWindow({
+            content: '<div style="padding:5px;font-size:12px;">' + result[0].address_name + '</div>'
+          });
+          infowindow.open(map, marker);
+
+          console.log('주소 검색 완료:', result[0].address_name);
+        } else {
+          alert('주소를 찾을 수 없습니다. 다시 시도해주세요.\n(입력: ' + address + ')');
+        }
+      });
+    }
+
+    function moveToCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const coords = new kakao.maps.LatLng(lat, lng);
+
+          map.setCenter(coords);
+          removeMarkers();
+          
+          const marker = new kakao.maps.Marker({
+            map: map,
+            position: coords
+          });
+          markers.push(marker);
+
+          const infowindow = new kakao.maps.InfoWindow({
+            content: '<div style="padding:5px;font-size:12px;">📍 내 위치</div>'
+          });
+          infowindow.open(map, marker);
+
+          console.log('내 위치:', lat, lng);
+        }, function(error) {
+          alert('위치 정보를 가져올 수 없습니다: ' + error.message);
+        });
+      } else {
+        alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+      }
+    }
+
+    function addMarker() {
+      addMarkerMode = !addMarkerMode;
+      
+      if (addMarkerMode) {
+        alert('지도를 클릭하여 마커를 추가하세요!');
+        map.setCursor('crosshair');
+      } else {
+        map.setCursor('');
+      }
+    }
+
+    function showClickInfo(lat, lng) {
+      const clickInfo = document.getElementById('clickInfo');
+      const clickLat = document.getElementById('clickLat');
+      const clickLng = document.getElementById('clickLng');
+      
+      clickInfo.style.display = 'block';
+      clickLat.textContent = '위도: ' + lat.toFixed(6);
+      clickLng.textContent = '경도: ' + lng.toFixed(6);
+    }
+
+    function removeMarkers() {
+      markers.forEach(function(marker) {
+        marker.setMap(null);
+      });
+      markers = [];
+    }
+
+    function changeZoomLevel() {
+      const level = parseInt(document.getElementById('zoomLevel').value);
+      map.setLevel(level);
+    }
+
+    // 엔터키로 주소 검색
+    document.addEventListener('DOMContentLoaded', function() {
+      const addressInput = document.getElementById('addressInput');
+      if (addressInput) {
+        addressInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            searchAddress();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
