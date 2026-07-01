@@ -1,8 +1,22 @@
 import './globals.css';
 
 export const metadata = {
+  metadataBase: new URL('https://runcraft-app.vercel.app'),
   title: 'RUNCRAFT · TMap 실지도 러닝 시뮬레이터',
   description: '실제 도로·보행로 경로 위에서 턴바이턴 음성 안내를 들으며 봇들과 경쟁하는 러닝 시뮬레이터',
+  openGraph: {
+    title: 'RUNCRAFT · 실지도 러닝 시뮬레이터',
+    description: '실제 도로 위에서 봇과 경쟁! 턴바이턴 음성 안내로 달리는 러닝 시뮬레이터 🏃 지금 눌러서 코스를 만들어보세요.',
+    url: 'https://runcraft-app.vercel.app',
+    siteName: 'RUNCRAFT',
+    locale: 'ko_KR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RUNCRAFT · 실지도 러닝 시뮬레이터',
+    description: '실제 도로 위에서 봇과 경쟁! 턴바이턴 음성 안내로 달리는 러닝 시뮬레이터 🏃',
+  },
 };
 
 export default function RootLayout({ children }) {
